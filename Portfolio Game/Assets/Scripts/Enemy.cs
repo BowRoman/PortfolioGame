@@ -5,6 +5,8 @@ public class Enemy : MonoBehaviour {
 
 	[SerializeField]
 	int Health = 100;
+    [SerializeField]
+    int DamageDealt = 10;
 
 	[SerializeField]
 	GameObject Drop;
@@ -13,18 +15,38 @@ public class Enemy : MonoBehaviour {
 	[SerializeField]
 	int MaximumDrops;
 
+    [SerializeField]
+    Transform Target;
+
 	private int DropAmount;
 
-    // Use this for initialization
     void Start()
 	{
 		DropAmount = Random.Range(MinimumDrops, MaximumDrops);
 	}
 	
-	// Update is called once per frame
 	void Update()
 	{
+        if(Target)
+        {
+            GetComponent<NavMeshAgent>().SetDestination(Target.position);
+        }
 	}
+
+    public void SetTarget(Transform newTarget)
+    {
+        Target = newTarget;
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if(other.gameObject.tag == "Objective")
+        {
+            // explode self to damage core
+            other.gameObject.GetComponent<ObjectiveControl>().Damage(DamageDealt);
+            Destroy(gameObject);
+        }
+    }
 
 	public void Damage(int points)
 	{
@@ -33,7 +55,7 @@ public class Enemy : MonoBehaviour {
 		{
 			for(int i = 0; i < DropAmount; ++i)
 			{
-				Instantiate(Drop, transform.position + new Vector3(Random.Range(-0.6f,0.6f),0.1f,Random.Range(-0.6f, 0.6f)), transform.rotation);
+				Instantiate(Drop, transform.position + new Vector3(Random.Range(-0.6f,0.6f),0.4f,Random.Range(-0.6f, 0.6f)), transform.rotation);
 			}
 			Destroy(gameObject);
 		}
